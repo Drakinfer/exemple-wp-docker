@@ -1,24 +1,56 @@
-# Containerisation de cette Application
+# Containerisation de l'Application WordPress
+Ce projet présente une version containerisée de l'application WordPress. Le code source est accessible à l'URL suivante : lien vers le dépôt GitHub.
 
-Vous devez containeriser cette application avec un fichier `docker-compose.yml``
+## Configuration des Services
+La mise en place de cette application nécessite l'orchestration de quatre services via un fichier docker-compose.yml :
 
-Nous avons besoin de 4 services :
+Un service MariaDB 10.3 pour la gestion de la base de données.
+Un service Adminer pour faciliter la connexion à la base de données.
+Un service utilisant notre Dockerfile personnalisé.
+Un service pour exécuter Nginx.
 
- 1. un service avec **MariaDB 10.3** pour la gestion de notre base de données
- 2. Un service  avec **Adminer** pour nous connecter sur la base de données
- 3. Un service qui va utiliser notre **Dockerfile**
- 4. Un service pour exécuter **Nginx**.
+## Installation du Projet
+Suivez ces étapes pour déployer l'application sur votre machine locale :
 
-## Informations à prendre en compte pour votre docker-compose
+Clonez le dépôt vers votre machine.
+```bash
+git clone https://github.com/tasmer/exemple-wp-docker
+```
 
-- Les deux derniers services (Nginx et celui qui utilise le Dockerfile) devront avoir un **Volume** qui pointe sur `/usr/share/nginx/html` pour monter le code source du projet dans ce dossier.
+Utilisez la commande suivante pour construire et démarrer les conteneurs.
+```bash
+`docker-compose up --build
+```
 
-- Vous devez surcharger la configuration de base de PHP-FPM par la configuration fournie dans `docker/config/php-fpm.conf`. La configuration de PHP-FPM se trouve dans `/usr/local/etc/php-fpm.d/www.conf` au niveau du container. Vous pouvez soit modifier le **Dockerfile** pour copier ce fichier dans l'image, soit utiliser docker-compose pour surcharger le fichier.
+Installez les dépendances du projet avec Composer.
+```bash
+`docker-compose exec wp composer install
+```
 
-- Pour la configuration de Nginx, faites une surcharge depuis le fichier **docker-compose.yml**. Le fichier suivant `docker/config/nginx.conf` doit remplacer celui du container `/etc/nginx/conf.d/default.conf`.
+Copiez le fichier .env.example vers un nouveau fichier .env et configurez les accès à la base de données.
+```bash
+`docker-compose exec wp cp .env.example .env`
+```
 
-## Instructions pour installer le projet WordPress
-- Installer les dépendances du projet avec la commande `composer install` depuis le container crée avec Dockerfile
-- Copier le fichier .env.example vers .env 
-- Configurer les accès à la base de données `DB_NAME` nom de la base de données, `DB_USER`, `DB_PASSWORD` utilisateur et mot de passe de la base de données, `DB_HOST` le hostname de votre base de données, qui n'est rien d'autre que le nom du service Mariadb utiliser pour se connecte à la base.
-- Remplacer la valeur de `WP_HOME` par http://localhost
+Éditez le fichier .env avec les informations de la base de données :
+.env
+```bash
+DB_NAME=wp
+DB_USER=root
+DB_PASSWORD=R00t
+DB_HOST=mariadb
+WP_HOME=http://localhost
+```
+Accédez à http://localhost dans votre navigateur pour visualiser l'application WordPress.
+
+## Commandes Utiles
+```bash
+docker-compose up --build : Construit et démarre les conteneurs.
+```
+```bash
+docker-compose down : Arrête et supprime les conteneurs.
+```
+```bash
+docker-compose exec wp composer install : Installe les dépendances du projet avec Composer.
+```
+Note : Si vous souhaitez installer la ligne de commande WordPress (WP-CLI), suivez les instructions fournies ici et ajustez le Dockerfile en conséquence. Cette étape est facultative mais peut vous apporter des fonctionnalités supplémentaires.
